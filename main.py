@@ -1,46 +1,89 @@
 import os
 import pandas as pd
-# Instalar Pandas "pip install pandas"
-# Instalar Openpyxl "pip install openpyxl"
 from pathlib import Path
+import time
 
 
-def unir_excels(ruta_carpeta, num_columnas, num_filas):
-    # Lista para almacenar los DataFrames de cada archivo Excel
+def get_downloads_folder():
+    home = str(Path.home())
+    downloads_english = os.path.join(home, "Downloads")
+    downloads_spanish = os.path.join(home, "Descargas")
+
+    if os.path.exists(downloads_english):
+        return downloads_english
+    elif os.path.exists(downloads_spanish):
+        return downloads_spanish
+    else:
+        raise FileNotFoundError("No se encontró la carpeta de descargas predeterminada.")
+
+
+def get_valid_column_number():
+    while True:
+        try:
+            num_columnas = int(input("Ingrese el número de columnas a unir: "))
+            return num_columnas
+        except ValueError:
+            print("Por favor, ingrese un número entero válido.")
+
+
+def get_unique_filepath(filepath):
+    base, ext = os.path.splitext(filepath)
+    counter = 1
+    new_filepath = filepath
+    while os.path.exists(new_filepath):
+        new_filepath = f"{base}({counter}){ext}"
+        counter += 1
+    return new_filepath
+
+
+def unir_excels(ruta_carpeta, num_columnas):
     dataframes = []
 
-    # Obtener la lista de archivos en la carpeta y ordenarla alfabéticamente
     archivos = sorted(os.listdir(ruta_carpeta))
 
-    # Iterar sobre los archivos ordenados en la carpeta
     for archivo in archivos:
-        # Verificar si el archivo es un Excel
         if archivo.endswith('.xlsx') or archivo.endswith('.xls'):
-            # Leer el archivo Excel y seleccionar todas las columnas
-            df = pd.read_excel(os.path.join(ruta_carpeta, archivo), nrows=num_filas, header=None)
-            # Seleccionar solo las columnas deseadas
-            df = df.iloc[:, :num_columnas]
-            # Agregar el DataFrame a la lista
-            dataframes.append(df)
+            try:
+                df = pd.read_excel(os.path.join(ruta_carpeta, archivo), header=None)
+                df = df.iloc[:, :num_columnas]
+                dataframes.append(df)
+            except Exception as e:
+                print(f"Error al leer el archivo {archivo}: {e}")
+
+    if not dataframes:
+        print("No se encontraron archivos Excel válidos para unir.")
+        return
 
     # Combinar los DataFrames en uno solo
-    df_final = pd.concat(dataframes)
+    df_final = pd.concat(dataframes, ignore_index=True)
 
-    # Obtener la ruta de la carpeta de descargas del usuario
-    carpeta_descargas = str(Path.home() / "Downloads")
-
-    # Guardar el DataFrame combinado en un nuevo archivo Excel en la carpeta de descargas
+    carpeta_descargas = get_downloads_folder()
     ruta_guardado = os.path.join(carpeta_descargas, 'resultado.xlsx')
-    df_final.to_excel(ruta_guardado, index=False, header=False)  # No incluir encabezado
 
-    print("¡Excels unidos satisfactoriamente! El archivo se ha guardado en la carpeta de descargas.")
+    if os.path.exists(ruta_guardado):
+        sobreescribir = input("El archivo 'resultado.xlsx' ya existe. ¿Desea sobrescribirlo? (si/no): ").strip().lower()
+        if sobreescribir != 'si':
+            ruta_guardado = get_unique_filepath(ruta_guardado)
+
+    # Guardar el DataFrame
+    df_final.to_excel(ruta_guardado, index=False, header=False)
+    print(f"¡Excels unidos satisfactoriamente! El archivo se ha guardado en {ruta_guardado}.")
 
 
-# Pedir al usuario la ruta de la carpeta y el número de columnas y filas
-# Reemplazamos barras inclinadas por barras invertidas para Windows
-ruta_carpeta = input("Ingrese la ruta de la carpeta donde están los archivos Excel: ").replace('/', '\\')
-num_columnas = int(input("Ingrese el número de columnas a unir: "))
-num_filas = int(input("Ingrese el número de filas a unir: "))
+if __name__ == "__main__":
+    print("Bienvenido a ExcelUnifier")
 
-# Llamar a la función unir_excels con los datos proporcionados por el usuario
-unir_excels(ruta_carpeta, num_columnas, num_filas)
+    while True:
+        ruta_carpeta = input("Ingrese la ruta de la carpeta donde están los archivos Excel: ").replace('/', '\\')
+        if not os.path.exists(ruta_carpeta):
+            print("La ruta especificada no existe.")
+            continue
+
+        num_columnas = get_valid_column_number()
+        unir_excels(ruta_carpeta, num_columnas)
+
+        continuar = input("¿Desea unir más archivos Excel? (si/no): ").strip().lower()
+        if continuar != 'si':
+            print("Gracias por usar ExcelUnifier. El programa se cerrará en 5 segundos.")
+            time.sleep(5)
+            break
