@@ -1,6 +1,6 @@
 # Unión de Archivos Excel
 
-Este script en Python te permite unir varios archivos Excel en una carpeta en un solo archivo, seleccionando un número específico de columnas y filas de cada uno.
+Este script en Python te permite unir varios archivos Excel en una carpeta en un solo archivo, seleccionando un número específico de columnas de cada uno.
 
 ## Requisitos
 
@@ -8,17 +8,14 @@ Este script en Python te permite unir varios archivos Excel en una carpeta en un
 - Pandas
 - Openpyxl
 
-Para instalar Pandas y Openpyxl, puedes utilizar pip:
-
+Para instalar Pandas y Openpyxl, puedes utilizar pip: pip install pandas openpyxl
 
 ## Uso
 
 1. Clona o descarga este repositorio en tu máquina local.
 2. Abre una terminal o línea de comandos y navega hasta el directorio donde se encuentra el script.
-3. Ejecuta el script usando Python:
-
-
-4. Se te solicitará ingresar la ruta de la carpeta donde están los archivos Excel que deseas unir, así como el número de columnas y filas que deseas unir de cada archivo.
+3. Ejecuta el script usando Python: python unir_excel.py
+4. Se te solicitará ingresar la ruta de la carpeta donde están los archivos Excel que deseas unir, así como el número de columnas que deseas unir de cada archivo.
 5. Una vez proporcionados los datos, el script combinará los archivos y generará un nuevo archivo Excel llamado "resultado.xlsx" en tu carpeta de descargas.
 
 ¡Y eso es todo! Ahora tienes todos tus datos combinados en un solo archivo Excel.
